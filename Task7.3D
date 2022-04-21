@@ -1,0 +1,55 @@
+import RPi.GPIO as GPIO
+import time
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+buzzer = 4
+trigger = 17
+echo = 27
+
+GPIO.setup(buzzer, GPIO.OUT)
+GPIO.setup(trigger, GPIO.OUT)
+GPIO.setup(echo, GPIO.IN)
+
+global Buzz
+Buzz = GPIO.PWM(buzzer, 659)
+Buzz.start(0)
+10
+def distance():
+    GPIO.output(trigger, True)
+    
+    time.sleep(0.0000001)
+    GPIO.output(trigger, False)
+    
+    StartTime = time.time()
+    StopTime = time.time()
+    
+    while GPIO.input(echo) == 0:
+        StartTime = time.time()
+        
+    while GPIO.input(echo) == 1:
+        StopTime = time.time()
+        
+    TimeElapsed = StopTime - StartTime
+    
+    distance = (TimeElapsed * 34300) / 2
+    
+    return distance
+
+while 1:
+    dist = distance()
+    vol = 0
+    
+    if dist < 40 and dist > 30 : vol = 25
+    elif dist < 30 and dist > 20 : vol =  50
+    elif dist < 20 and dist > 10 : vol =  75
+    elif dist < 10  : vol =  100
+    else: vol =  0
+    
+    Buzz.ChangeDutyCycle(vol)
+    print ("Measured Distance = %.1f cm" % dist)
+    print ("Measured vol = %.1f " % vol)
+    time.sleep(1)
+
+GPIO.cleanup()
